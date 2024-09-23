@@ -305,3 +305,133 @@ plt.xticks(rotation = 90, fontsize = 8)
 plt.ylabel("Values")
 plt.legend()
 plt.show()
+
+# ----------------------------
+
+df_cleaned = df[df['Գինը'].str.contains('\d', regex=True)]
+df_cleaned['Գինը'] = pd.to_numeric(df_cleaned['Գինը'].str.replace('[\$,]', '', regex=True))
+region_counts = df_cleaned['Տարածաշրջան'].value_counts()
+
+threshold = 5 
+filtered_region_counts = region_counts[region_counts > threshold]
+
+colors = plt.get_cmap('tab20').colors
+
+plt.figure(figsize=(10, 10))
+explode = [0.1 if i == filtered_region_counts.idxmax() else 0 for i in filtered_region_counts.index]
+wedges, _, autotexts = plt.pie(filtered_region_counts, autopct='%1.1f%%', startangle=90, explode=explode,
+                               shadow=True, colors=colors, wedgeprops={'edgecolor': 'black'})
+
+plt.legend(wedges, filtered_region_counts.index, title="Regions", loc="center left", bbox_to_anchor=(1, 0, 0.5, 1), fontsize=10)
+
+plt.title('Filtered Distribution of Properties by Region', fontsize=16)
+plt.axis('equal')  
+plt.tight_layout()
+plt.show()
+
+# ----------------------------
+
+bins = [0, 50000, 100000, 150000, 200000, 300000, 500000, float('inf')]
+labels = ['0-50K', '50K-100K', '100K-150K', '150K-200K', '200K-300K', '300K-500K', '500K+']
+df['Price_Range'] = pd.cut(df['Գինը_clean'], bins=bins, labels=labels)
+
+price_range_counts = df['Price_Range'].value_counts()
+
+plt.figure(figsize=(10, 10))
+explode = [0.1 if i == price_range_counts.idxmax() else 0 for i in price_range_counts.index]
+wedges, _, autotexts = plt.pie(price_range_counts, autopct='%1.1f%%', startangle=90, explode=explode,
+                               shadow=True, colors=colors, wedgeprops={'edgecolor': 'black'})
+
+plt.legend(wedges, price_range_counts.index, title="Price Ranges", loc="center left", bbox_to_anchor=(1, 0, 0.5, 1), fontsize=10)
+
+plt.title('Distribution of Properties by Price Range', fontsize=16)
+plt.axis('equal')
+plt.show()
+
+# ----------------------------
+
+region_price_avg = df.groupby("Տարածաշրջան")["Գինը_clean"].mean().sort_values(ascending=False)
+
+plt.figure(figsize=(12, 8))
+region_price_avg.plot(kind='bar', color='skyblue', edgecolor='black')
+plt.title('Average Price by Region', fontsize=16)
+plt.ylabel('Average Price ($)', fontsize=12)
+plt.xlabel('Region', fontsize=12)
+plt.xticks(rotation=45, ha='right', fontsize=10)
+plt.tight_layout()
+plt.show()
+
+# ----------------------------
+
+df["Մակերես_clean"] = pd.to_numeric(df["Մակերես"], errors='coerce')
+df["Սենյակներ_clean"] = pd.to_numeric(df["Սենյակներ"], errors='coerce')
+
+rooms_area_avg = df.groupby("Սենյակներ_clean")["Մակերես_clean"].mean().sort_values(ascending=True)
+
+plt.figure(figsize=(10, 6))
+rooms_area_avg.plot(kind='bar', color='lightcoral', edgecolor='black')
+plt.title('Average Area by Number of Rooms', fontsize=16)
+plt.ylabel('Average Area (sq meters)', fontsize=12)
+plt.xlabel('Number of Rooms', fontsize=12)
+plt.xticks(rotation=0, fontsize=10)
+plt.tight_layout()
+plt.show()
+
+# ----------------------------
+
+renovation_price_avg = df.groupby("Վերանորոգում")["Գինը_clean"].mean().sort_values(ascending=False)
+
+plt.figure(figsize=(10, 6))
+renovation_price_avg.plot(kind='bar', color='lightblue', edgecolor='black')
+plt.title('Average Price by Renovation Status', fontsize=16)
+plt.ylabel('Average Price ($)', fontsize=12)
+plt.xlabel('Renovation Status', fontsize=12)
+plt.xticks(rotation=45, ha='right', fontsize=10)
+plt.tight_layout()
+plt.show()
+
+# ----------------------------
+
+df["Հարկ"] = pd.to_numeric(df["Հարկ"], errors='coerce')
+renovation_price_avg = df.groupby("Հարկ")["Գինը_clean"].mean().sort_index(ascending=True)
+
+plt.figure(figsize=(10, 6))
+renovation_price_avg.plot(kind='bar', color='lightblue', edgecolor='black')
+plt.title('Average Price by Floor', fontsize=16)
+plt.ylabel('Average Price ($)', fontsize=12)
+plt.xlabel('Floor', fontsize=12)
+plt.xticks(rotation=45, ha='right', fontsize=10)
+plt.tight_layout()
+plt.show()
+
+# ----------------------------
+
+sns.color_palette("tab10")
+sns.set(style="darkgrid")
+
+plt.figure(figsize=[15,7])
+sns.histplot(data=df, x="Գինը_clean", y='Մակերես')
+
+plt.xticks(rotation=45)
+plt.xticks(range(0, 1000000, 100000))
+plt.xlabel("Price In $", labelpad=20)
+plt.tick_params(which='major', pad=2)
+
+plt.show()
+
+# ----------------------------
+
+df[(df['Մակերես'] < 100) & (df['Գինը_clean'] > 2.5 * 200000)]
+
+# ----------------------------
+
+df[(df['Մակերես'] > 400) ]
+
+# ----------------------------
+
+df[(df['Մակերես'] > 100) & (df['Գինը_clean'] > 900000)]
+
+# ----------------------------
+
+df[df['Գինը_clean'] <= 1000]
+
